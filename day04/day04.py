@@ -1,25 +1,20 @@
 import fileinput
+import re
 
 def read_input(filename):
-    myFile = open(filename, "r")
-    myLine = myFile.readline()
-    listOfAllPassports = []
-    while myLine:
-        currentPassport = {}
-        while myLine and myLine != "\n":
-            temp = myLine.split(" ")
-            for field in temp:
-                temp = field.strip().split(':')
-                currentPassport[temp[0]] = temp[1]
-            myLine = myFile.readline()
-        myLine = myFile.readline()
-        listOfAllPassports.append(currentPassport)
-    
-    myFile.close()
-    return listOfAllPassports      
+    passList = [] 
+    passports = open(filename, "r").read().strip().split("\n\n")
+    for passport in passports:
+        passDict = {}
+        temp = re.split(' |\n', passport)
+        for field in temp:
+            kv = field.split(':')
+            passDict[kv[0]] = kv[1]
+        passList.append(passDict)
+    return passList
 
 def main():
-    passports = read_input("/home/adam/Documents/AdventOfCode2020/day04/input4.txt")
+    passports = read_input("input4.txt")
     fields = {
         'byr': lambda x: 2002 >= int(x) >= 1920,
         'iyr': lambda x: 2020 >= int(x) >= 2010,
@@ -35,7 +30,6 @@ def main():
             ans1 += 1
             if all(fields[key](passport[key]) for key in fields):
                 ans2 += 1
-   
     print(ans1, ans2)
 
 main()
