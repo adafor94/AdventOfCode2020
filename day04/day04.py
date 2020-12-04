@@ -14,10 +14,9 @@ def read_input(filename):
             myLine = myFile.readline()
         myLine = myFile.readline()
         listOfAllPassports.append(currentPassport)
-
-    return listOfAllPassports
-        
+    
     myFile.close()
+    return listOfAllPassports      
 
 def main():
     passports = read_input("/home/adam/Documents/AdventOfCode2020/day04/input4.txt")
