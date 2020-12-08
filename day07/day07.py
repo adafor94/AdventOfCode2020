@@ -1,11 +1,9 @@
 import fileinput
-import functools
 
 def formatRule(rule):
     rule = rule.split("contain")
     rule1 = rule[0].strip().split(' ')
     rule1 = rule1[0] + " " + rule1[1]
-    
     rule2 = rule[1].split(',')
     listOfFormattedRule2 = []
     for r in rule2:
