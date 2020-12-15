@@ -1,2 +1,2 @@
 # AdventOfCode2020
-An opportunity to learn some Python
+An opportunity to practise problem solving and learn some Python
