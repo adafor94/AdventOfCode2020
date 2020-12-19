@@ -5,11 +5,10 @@ def main():
 
     sum = 0
     for expression in expressions:
-        sum += int(calc2(expression))
-
+        sum += int(simplify(expression))
     print(sum)
 
-def calc(exp):
+def calcP1(exp):
     exp = exp.split(' ')
     sum = int(exp[0])
     i = 1
@@ -24,7 +23,37 @@ def calc(exp):
         i += 1
     return str(sum)
 
-def calc2(exp):
+def calcP2(exp):
+    exp = exp.split(' ')
+    i = 0
+    while i < len(exp):
+        char = exp[i]
+        if char == '+':
+            s = int(exp[i-1]) + int(exp[i+1])
+            a = []
+            if i > 2:
+                a = exp[0:i-1]           
+            exp =  a + [str(s)] + exp[i+2:]
+            i = 0
+        else:
+            i += 1
+
+    i = 0        
+    while i < len(exp):
+        char = exp[i]
+        if char == '*':
+            s = int(exp[i-1]) * int(exp[i+1])
+            a = []
+            if i > 2:
+                a = exp[0:i-1]           
+            exp =  a + [str(s)] + exp[i+2:]
+            i = 0
+        else:
+            i += 1
+
+    return str(exp[0])
+
+def simplify(exp):
     stack = deque()
     e = ''
     i = 0
@@ -44,11 +73,11 @@ def calc2(exp):
                         temp += exp[i]
                 else:
                     temp += exp[i]
-            temp = calc2(temp)
+            temp = simplify(temp)
             e += temp
         else:
             e += char
         i += 1
-    return calc(e)
+    return calcP1(e)   #Change to calcP1(e) for PART1
 
 main()
