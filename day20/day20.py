@@ -4,11 +4,12 @@ import copy
 
 def main():
     originalTiles = open("input20.txt", "r").read().strip().split('\n\n')
-    SIDELENGTH = int(math.sqrt(len(originalTiles)))
-
+    
     originalTiles = [tile.split('\n') for tile in originalTiles]
     originalTiles = [(tile[0].split(' ')[1][0:-1], tile[1:]) for tile in originalTiles] #List on type [(ID, PATTERN)]
 
+    SIDELENGTH = int(math.sqrt(len(originalTiles)))
+    SEAMNOSTERPATTERN = [(0,0), (1,-18),(1,-13),(1,-12), (1,-7), (1,-6), (1,-1), (1,0), (1,1), (2,-17),(2,-14),(2,-11), (2,-8), (2,-5), (2,-2)] #Coordinates of seamonster relative to first coordinate
     COLSINTILE = len(originalTiles[0][1][1])
     ROWSINTILE = len(originalTiles[0][1])
     NUMBEROFTILES = len(originalTiles)
@@ -17,25 +18,21 @@ def main():
     imageTiles = [emptyTile] * NUMBEROFTILES                    #Fill imageTiles with emptyTiles to start with
     imageIDs = ['0'] * NUMBEROFTILES                            #Fill imageID with Zeroes to start with
 
-    SEAMNOSTERPATTERN = [(0,0), (1,-18),(1,-13),(1,-12), (1,-7), (1,-6), (1,-1), (1,0), (1,1), (2,-17),(2,-14),(2,-11), (2,-8), (2,-5), (2,-2)] #Coordinates of seamonster relative to first coordinate
 
     tiles = {}  # ID -> TILE
-    for tile in originalTiles:
-        tiles[tile[0]] = tile[1]                             
-
     possibleMatches = {} # ID -> MATCHES
     ans1 = 1            #Product of IDs of tiles with 2 matches aka corner-tiles
     corners = []
+
     for tile in originalTiles:
+        tiles[tile[0]] = tile[1]                             
         matches = findNeighbours(tile, originalTiles)
         possibleMatches[tile[0]] = matches
         if len(matches) == 2:
             ans1 *= int(tile[0])
             corners.append(tile[0])
 
-
     #PART2
-
     topLeftCorner = ''          #Find top left corner to start with
     for c in corners:
         sides = findSidesThatHasMatches(c, tiles, possibleMatches)
@@ -48,7 +45,7 @@ def main():
     imageTiles[0] = tiles[topLeftCorner]    #Start filling imageTile
     imageIDs[0]   = topLeftCorner           #Start filling imageIDs
     pos = 1
-    while pos < len(imageTiles):
+    while pos < NUMBEROFTILES:
         if pos % SIDELENGTH == 0:   #IF at the end of row, get matches from tile above ELSE from tile to the left
             matchingTileIDs = possibleMatches[imageIDs[pos-SIDELENGTH]]
         else:
@@ -57,7 +54,6 @@ def main():
         for tileID in matchingTileIDs:        #Loop through possible
             if tileID not in usedIDs:           #Check if ID is used
                 tile = tiles[tileID]            
-                sides = getSides(tile)
                 version = findVersion(tile, imageTiles, pos, SIDELENGTH)        #Return correct version of tile if one exists, else return False
                 if version != False:                    #If a correct version is found update imageTiles, imageIDs and usedIDs
                     imageTiles[pos] = version
@@ -66,14 +62,12 @@ def main():
                     break
         pos += 1    #Update pos to find next tile
 
-    withoutBorders = removeBorders(imageTiles, SIDELENGTH)           #Remove border
-    assembled = assembleImage(withoutBorders, SIDELENGTH)               #Assemble image
+    tilesWithoutBorders = removeBorders(imageTiles, SIDELENGTH)              #Remove border
+    assembled = assembleImage(tilesWithoutBorders, SIDELENGTH)               #Assemble image
   
     # FIND SEAMONSTERS!
-
     allFinalImages = getMutations(assembled)            #Variations of image
-    countHashtags = 0
-    countSeamonsters = 0
+    countHashtags = countSeamonsters = 0
     for image in allFinalImages:                    #Try each variation until seamonsters are found
         countHashtags = 0
         copyImage = copy.copy(image)                #Copy to mark seamonsters for fun
@@ -81,16 +75,13 @@ def main():
             for j in range(len(image[0])):
                 if image[i][j] == '#':              #Count number of hashtags for answer for part2
                     countHashtags += 1
-                found = True
                 indexes = []                        #Save indexes to mark seamonsters
                 for pos in SEAMNOSTERPATTERN:       #For every index of SEAMONSTERPATTERN, calculate coordinates.
-                    row = i + pos[0]
-                    col = j + pos[1]
+                    row, col = i + pos[0], j + pos[1]
                     indexes.append((row,col))
-                    if row < 0 or row > len(image)-1 or col < 0 or col > len(image[0])-1 or image[row][col] != '#': #If coordinates are out of bounds or the char is not '#' -> break
-                        found = False
+                    if not (0 < row < len(image)) or not (0 < col < len(image[0])-1) or image[row][col] != '#': #If coordinates are out of bounds or the char is not '#' -> break
                         break
-                if found:   #If succesful a seamonster is found. Update count and update copyOfImage
+                else:   
                     countSeamonsters += 1
                     for index in indexes:
                         copyImage[index[0]] = copyImage[index[0]][0:index[1]] + '0' + copyImage[index[0]][index[1]+1:]
@@ -101,7 +92,6 @@ def main():
 
     print('Answer Part 1:', ans1)
     print('Answer Part 2:', countHashtags - countSeamonsters * 15)
-
 
 def assembleImage(imageTiles, SIDELENGTH):
     assembledImage = []
@@ -181,10 +171,10 @@ def findVersion(tile, imageTiles, pos, SIDELENGTH):
                 return version
     return False
 
-def getMutations(m):
-    mutations = [m]
-    mutations.append(flipMatrixY(m))
-    temp = m
+def getMutations(tile):
+    mutations = [tile]
+    mutations.append(flipMatrixY(tile))
+    temp = tile
     for i in range(3):      #Add rotated and flipped
         rotated = rotateMatrix(temp)
         mutations.append(rotated)
@@ -192,21 +182,21 @@ def getMutations(m):
         temp = rotated
     return mutations
 
-def rotateMatrix(m):
+def rotateMatrix(tile):
     newM = []
-    for j in range(len(m)):
+    for j in range(len(tile)):
         temp = ''
-        for i in range(len(m[0])-1,-1,-1):
-            temp += m[i][j]
+        for i in range(len(tile[0])-1,-1,-1):
+            temp += tile[i][j]
         newM.append(temp)
     return newM
 
-def flipMatrixY(m):
+def flipMatrixY(tile):
     newM = []
-    for i in range(len(m[0])-1,-1,-1):
+    for i in range(len(tile[0])-1,-1,-1):
         temp = ''
-        for j in range(len(m)):
-            temp += m[i][j]
+        for j in range(len(tile)):
+            temp += tile[i][j]
         newM.append(temp)
     return newM
 
