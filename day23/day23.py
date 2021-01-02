@@ -1,6 +1,6 @@
 def main():
     cupsPART1 = [int(num) for num in '469217538'] #Starting order
-    cupsPART2 = cupsPART1 + [num for num in range(max(cupsPART1),1000001)]      #Append remaining numbers up to one million
+    cupsPART2 = cupsPART1 + [num for num in range(max(cupsPART1)+1,1000001)]      #Append remaining numbers up to one million
     cupsPART1 = Cycle(cupsPART1)
     cupsPART2 = Cycle(cupsPART2)
    
@@ -13,7 +13,7 @@ def main():
 
 class Cycle:                    #Uses a dictionary to make a linked-list like data structure with quick access. 
     def __init__(self, cups):
-        self.MAX = max(cups)        
+        self.MAX = len(cups)        
         self.cycle = {} 
         for i in range(len(cups)-1):        #Map each cup to the next one in the list
             c = cups[i]
@@ -22,7 +22,7 @@ class Cycle:                    #Uses a dictionary to make a linked-list like da
         
         self.cycle[cups[-1]] = cups[0]      #Map last cup to the first to make a cycle
         self.currentCup = cups[0]           #Set currentCup as the first one in the list
-
+        
     def play(self, rounds):                     #Uncomment for debugging
         for i in range(rounds):
             # print('ROUND:', i+1)
@@ -51,20 +51,16 @@ class Cycle:                    #Uses a dictionary to make a linked-list like da
 
     def insert(self, cups):             
         destination = self.currentCup - 1       
-        if destination < 1:                 #If destination less than 1 value wraps around to the highest value
-            destination = self.MAX
-
-        while destination in cups:          #If destination not in the dictionary = is in cups, decrease by one and try again
-            destination -= 1
-            if destination < 1:
+        while destination < 1 or destination in cups:          #If destination not in the dictionary = is in cups, decrease by one and try again
+            if destination == 0:
                 destination = self.MAX
+            else:
+                destination -= 1
         
      #   print('Destination: ', destination)
-        temp = self.cycle[destination]     #Save the cup that destination points at. 
-        for c in cups:
-            self.cycle[destination] = c
-            destination = c
-        self.cycle[destination] = temp
+        temp = self.cycle[destination]     #Save the cup that destination points at.
+        self.cycle[destination] = cups[0] 
+        self.cycle[cups[-1]] = temp 
 
     def updateCurrent(self):                #Simply updating to next cup in the cycle
         self.currentCup = self.cycle[self.currentCup]  
