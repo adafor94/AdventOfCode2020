@@ -14,15 +14,14 @@ def main():
 class Cycle:                    #Uses a dictionary to make a linked-list like data structure with quick access. 
     def __init__(self, cups):
         self.MAX = len(cups)        
-        self.cycle = {} 
+        self.cycle = [0] * (self.MAX + 1)
         for i in range(len(cups)-1):        #Map each cup to the next one in the list
             c = cups[i]
             nextCup = cups[i+1]
             self.cycle[c] = nextCup
-        
         self.cycle[cups[-1]] = cups[0]      #Map last cup to the first to make a cycle
         self.currentCup = cups[0]           #Set currentCup as the first one in the list
-        
+
     def play(self, rounds):                     #Uncomment for debugging
         for i in range(rounds):
             # print('ROUND:', i+1)
