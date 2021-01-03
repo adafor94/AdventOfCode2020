@@ -1,24 +1,18 @@
 def main():
-    publicKeys = open("input25.txt", "r").read().strip().split('\n')
-    cardPublicKey, doorPublicKey = publicKeys[0], publicKeys[1]
-    cardLoopSize, doorLoopSize = findLoopSize(cardPublicKey), findLoopSize(doorPublicKey)
-    ek1, ek2 = calcEncyptionKey(cardPublicKey, doorLoopSize), calcEncyptionKey(doorPublicKey, cardLoopSize)
+    cardPublicKey, doorPublicKey = 1327981, 2822615
+    cardLoopSize = findLoopSize(cardPublicKey)
+    doorLoopSize = findLoopSize(doorPublicKey)
+    encryptionKey1 = pow(int(cardPublicKey), doorLoopSize, 20201227)
+    # encryptionKey2 = pow(int(doorPublicKey), cardLoopSize, 20201227)
     
-    print('PK:', cardPublicKey, doorPublicKey, 'LS:', cardLoopSize, doorLoopSize, 'EK:', ek1, ek2)
+    print('PK:', cardPublicKey, doorPublicKey, 'LS:', cardLoopSize, doorLoopSize, 'EK:', encryptionKey1)
 
 def findLoopSize(key):
     i = 0
     sum = 1
-    while True:
-        if sum == int(key):
-            return i
+    while sum != key:
         sum = (sum*7) % 20201227
         i += 1
-
-def calcEncyptionKey(key, loopSize):
-    sum = 1
-    for _ in range(loopSize):
-        sum = (sum * int(key)) % 20201227   
-    return sum
+    return i
 
 main()
